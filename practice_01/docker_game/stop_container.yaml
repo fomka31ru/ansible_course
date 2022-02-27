@@ -1,0 +1,17 @@
+---
+- name: stop containers
+  hosts: nodes
+  gather_facts: true
+  vars:
+    containers: ["webmario", "webdoom"]
+  become: true
+  become_method: sudo
+
+  tasks:
+    - name: stop containers
+      community.docker.docker_container:
+        name: "{{ containerized_game }}"
+        state: stopped
+      loop: "{{ containers }}"
+      loop_control:
+        loop_var: containerized_game

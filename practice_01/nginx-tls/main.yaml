@@ -1,0 +1,139 @@
+---
+- name: configure webserver with tls
+  hosts: nodes
+  gather_facts: false
+  become: true
+  become_method: sudo
+  vars:
+    nginx_port_tls: 443
+    cert_path: "/etc/nginx/ssl"
+
+  tasks:
+
+    - name: Create necessary folders
+      file:
+        path: "{{cert_path}}"
+        state: directory
+        recurse: yes
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: create nginx repo definition
+      copy:
+        src: nginx.repo
+        dest: /etc/nginx
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: install nginx
+      apt:
+        name: nginx
+        update_cache: true
+        state: present
+
+    - name: copy main nginx config file
+      copy:
+        src: files/nginx.conf
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart nginx
+
+    - name: copy site's nginx config file
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/conf.d/notls.conf
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart nginx
+
+    - name: copy index.html
+      template:
+        src: templates/index.html.j2
+        dest: /usr/share/nginx/html/index.html
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart nginx
+
+    - name: Install collection ansible.*
+      vars: 
+        names: "ansible.posix community.crypto"
+      command: "ansible-galaxy collection install {{names}}"
+      delegate_to: localhost
+      run_once: true
+      become: false
+
+    - name: install required python modules
+      pip: 
+        name: pyopenssl
+        executable: pip3
+      delegate_to: localhost
+      become: false
+      run_once: true
+      tags: debug
+
+    - name: install apt firewalld
+      apt:
+        name: firewalld
+        update_cache: true
+        state: present
+
+    - name: insert firewalld rule for nginx
+      firewalld:
+        port: "{{ nginx_port_tls }}/tcp"
+        permanent: true
+        state: enabled
+        immediate: true
+      ignore_errors: true
+
+    - name: install required linux modules
+      apt: name={{ item }} state=latest update_cache=yes 
+      loop: [apt-transport-https, lsb-release, ca-certificates, openssl]
+
+    - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
+      openssl_privatekey:
+        path: "{{cert_path}}/nginx.pem"
+      notify: restart nginx
+
+    - name: Generate an OpenSSL Certificate Signing Request
+      openssl_csr:
+        path: "{{cert_path}}/nginx.csr"
+        privatekey_path: "{{cert_path}}/nginx.pem"
+        common_name: nginx.localhost
+      notify: restart nginx
+
+    - name: Generate a Self Signed OpenSSL certificate
+      openssl_certificate:
+        path: "{{cert_path}}/nginx.crt"
+        privatekey_path: "{{cert_path}}/nginx.pem"
+        csr_path: "{{cert_path}}/nginx.csr"
+        provider: selfsigned
+      notify: restart nginx
+
+    # - name: ensure nginx is enabled and started
+    #   service:
+    #     name: nginx
+    #     state: started
+    #     enabled: true
+
+  post_tasks:
+    - name: check web site from control server
+      uri:
+        url: "https://{{ ansible_host }}:{{ nginx_port_tls }}"
+        return_content: true
+        validate_certs: no
+      connection: local
+      register: example_webpage_out
+      failed_when: example_webpage_out.status != 200
+      become: false
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted

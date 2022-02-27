@@ -1,0 +1,71 @@
+# ansible-galaxy collection install community.docker
+---
+- name: install docker and run doom
+  hosts: nodes
+  gather_facts: false
+  become: true
+  become_method: sudo
+  vars:
+    mario: true
+    mario_port: 9999
+    doom: true
+    doom_port: 8888
+  tasks:
+
+    # - name: curl docker
+    #   raw: "curl -sSL https://get.docker.com/ | sh"
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add docker repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present    
+        
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes force_apt_get=yes
+      loop: 
+        - 'docker'
+        - 'docker-ce'
+        - 'python3-pip'
+        - 'python2'
+      # become: true
+    
+    - name: install docker-py + particular version of websocket
+      pip:
+        executable: /usr/bin/pip
+        name:
+          - docker-py
+          - websocket-client==0.32.0
+
+    - name: ensure docker is started
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    # Долгий этап. Скачивание образа из dockerhub
+    - name: run webdoom
+      community.docker.docker_container:
+        name: webdoom
+        image: "jakolehm/http-doom:0.1.0"
+        # image: "mattipaksula/http-doom:latest"
+        ports:
+          - "{{ doom_port }}:8080"
+      when: doom
+      tags: debug
+
+    # Долгий этап. Скачивание образа из dockerhub
+    - name: run web mario
+      community.docker.docker_container:
+        name: webmario
+        image: kaminskypavel/mario
+        ports:
+          - "{{ mario_port }}:8080"
+      when: mario
+      tags: debug
+
+
