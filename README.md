@@ -1,2 +1,3 @@
 # ansible_course
-first day exercise in practice_01 folder
+The first day exercise is in practice_01 folder.
+
