@@ -68,20 +68,23 @@
       run_once: true
       become: false
 
-    - name: install required python modules
-      pip: 
-        name: pyopenssl
-        executable: pip3
-      delegate_to: localhost
-      become: false
-      run_once: true
-      tags: debug
-
-    - name: install apt firewalld
+    - name: install required apt packets
       apt:
-        name: firewalld
+        name: "{{item}}"
         update_cache: true
         state: present
+      loop: ['python3-pip', 'firewalld']
+      # tags: debug
+
+    - name: install required python modules
+      pip: 
+        name: "{{ item }}" 
+        # executable: pip3
+      loop: ['cryptography', 'pyopenssl']
+      # delegate_to: localhost
+      # become: false
+      # run_once: true
+      # tags: debug
 
     - name: insert firewalld rule for nginx
       firewalld:
