@@ -1,0 +1,43 @@
+---
+- name: install MariaDB
+  hosts: nodes
+  become: true
+  become_method: sudo
+  vars_files:
+    - vars/main.yaml
+  tasks:
+
+    - name: Install 'mariadb-server' and others specific packages
+      vars: 
+        apt_list: 
+          - 'mariadb-server'
+          - 'python3-dev' 
+          - 'libmysqlclient-dev'
+      apt:
+        name: "{{apt_name}}"
+        update_cache: true
+        state: present
+      loop: "{{apt_list}}"
+      loop_control:
+        loop_var: apt_name
+
+
+    - name: Ensure 'mariadb' service is started and enabled
+      service:
+        name: mariadb
+        state: started
+        enabled: true
+
+
+    - name: install 'MySQL-python' module
+      pip: 
+        name: 'mysqlclient' 
+
+
+    # - name: Create "{{ db_name }}" database
+    #   mysql_db:
+
+    # - name: >
+    #     Create database user "{{ db_user }}" with "{{ db_pass }}"
+    #     and "{{ wp_db_name }}".*:ALL privelege
+    #   mysql_user:
