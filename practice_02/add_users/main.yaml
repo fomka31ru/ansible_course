@@ -1,0 +1,30 @@
+---
+- name:  add Users to remote hosts
+  hosts: nodes
+  gather_facts: true
+  become: true
+  become_method: sudo
+  vars_files:
+    - vars/users.yaml
+  
+  tasks:
+
+      - name: add users
+        user:
+          name: "{{ user.name | capitalize }}"
+          password: "{{ user.password | password_hash('sha512')}}"
+          comment: "Ansible-generated user"
+          state: present
+        loop: "{{ _users }}"
+        loop_control:
+          loop_var: user
+          pause: 5
+        # notify: restart ssh 
+        no_log: true
+      
+
+  handlers:
+    - name: restart ssh
+      service:
+        name: ssh
+        state: restarted
