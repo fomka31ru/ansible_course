@@ -21,23 +21,35 @@
       loop_control:
         loop_var: apt_name
 
-
     - name: Ensure 'mariadb' service is started and enabled
       service:
         name: mariadb
         state: started
         enabled: true
 
-
     - name: install 'MySQL-python' module
       pip: 
         name: 'mysqlclient' 
 
+    - name: insert firewalld rule for ngmysql
+      firewalld:
+        port: "{{mysql_port}}/tcp"
+        permanent: true
+        state: enabled
+        immediate: true
+      ignore_errors: true
 
-    # - name: Create "{{ db_name }}" database
-    #   mysql_db:
+    - name: Create "{{ db_name }}" database
+      mysql_db:
+          name : "{{ db_name }}"
+          state: present
 
-    # - name: >
-    #     Create database user "{{ db_user }}" with "{{ db_pass }}"
-    #     and "{{ wp_db_name }}".*:ALL privelege
-    #   mysql_user:
+    - name: >
+        Create database user "{{ db_user }}" with "{{ db_pass }}"
+        and "{{db_name}}".*:ALL privelege
+      mysql_user:
+        name: "{{db_user}}"
+        password: "{{ db_pass }}"
+        priv: '{{db_name}}.*:ALL'
+        state: present
+      no_log: true
