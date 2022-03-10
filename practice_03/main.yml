@@ -5,7 +5,7 @@
   vars:
     cert_path: "/etc/nginx/ssl"
     cert_name: "nginx" 
- 
+    nginx_port: 443
   tasks:
 
     # - name: Install collection ansible.*
