@@ -1,0 +1,30 @@
+---
+  - name: install required linux modules
+    apt: name={{ item }} state=latest update_cache=yes 
+    loop: [apt-transport-https, lsb-release, ca-certificates, openssl]
+
+  - name: Create necessary folders
+    file:
+      path: "{{cert_path}}"
+      state: directory
+      recurse: yes
+      owner: root
+      group: root
+      mode: 0644
+      
+  - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
+    openssl_privatekey:
+      path: "{{cert_path}}/{{cert_name}}.pem"
+
+  - name: Generate an OpenSSL Certificate Signing Request
+    openssl_csr:
+      path: "{{cert_path}}/{{cert_name}}.csr"
+      privatekey_path: "{{cert_path}}/{{cert_name}}.pem"
+      common_name: nginx.localhost
+
+  - name: Generate a Self Signed OpenSSL certificate
+    openssl_certificate:
+      path: "{{cert_path}}/{{cert_name}}.crt"
+      privatekey_path: "{{cert_path}}/{{cert_name}}.pem"
+      csr_path: "{{cert_path}}/{{cert_name}}.csr"
+      provider: selfsigned
