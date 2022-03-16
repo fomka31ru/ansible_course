@@ -1,15 +1,20 @@
+---
+# Перед запуском ansible-lint создать файл .ansible-lint
+# skip_list:
+#   - fqcn-builtins
+
 - name: install NGINX && MARIADB
   hosts: nodes
   become: true
   become_method: sudo
   vars:
     cert_path: "/etc/nginx/ssl"
-    cert_name: "nginx" 
+    cert_name: "nginx"
     nginx_port: 443
   tasks:
 
     # - name: Install collection ansible.*
-    #   vars: 
+    #   vars:
     #     names: "ansible.posix community.crypto"
     #   command: "ansible-galaxy collection install {{names}}"
     #   delegate_to: localhost
@@ -25,12 +30,12 @@
             state: present
           loop: ['python3-pip', 'firewalld']
           tags: always
-          
+
         - name: install required python modules
-          pip: 
-            name: "{{ item }}" 
+          pip:
+            name: "{{ item }}"
           loop: ['cryptography', 'pyopenssl']
-          tags: 
+          tags:
             - ca
             - nginx
 
@@ -38,41 +43,41 @@
           include_role:
             name: "nginx_certificate"
             apply:
-              tags: 
+              tags:
                 - ca
-          tags: 
+          tags:
             - never
-          
+
         - name: Install nginx
           include_role:
             name: nginx
             handlers_from: main.yml
             apply:
-              tags: 
+              tags:
                 - nginx
-          tags: 
+          tags:
             - always
-          
+
         - name: Install mysql
           include_role:
             name: "mariadb"
             apply:
-              tags: 
+              tags:
                 - db
-          tags: 
+          tags:
             - always
-      when: 
+      when:
         - "ansible_facts.distribution | lower == 'ubuntu'"
 
   post_tasks:
-  - name: check web site from control server
-    uri:
-      url: "https://{{ ansible_host }}:{{ nginx_port }}"
-      return_content: true
-      validate_certs: nols
-    connection: local
-    register: example_webpage_out
-    failed_when: example_webpage_out.status != 200
-    become: false
-    tags: 
-      - nginx
+    - name: check web site from control server
+      uri:
+        url: "https://{{ ansible_host }}:{{ nginx_port }}"
+        return_content: true
+        validate_certs: false
+      connection: local
+      register: example_webpage_out
+      failed_when: example_webpage_out.status != 200
+      become: false
+      tags:
+        - nginx
