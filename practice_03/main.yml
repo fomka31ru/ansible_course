@@ -2,6 +2,8 @@
 # Перед запуском ansible-lint создать файл .ansible-lint
 # skip_list:
 #   - fqcn-builtins
+#   - meta-incorrect
+#   - meta-no-info
 
 - name: install NGINX && MARIADB
   hosts: nodes
