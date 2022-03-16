@@ -1,0 +1,73 @@
+- name: install NGINX && MARIADB
+  hosts: nodes
+  become: true
+  become_method: sudo
+  vars:
+    cert_path: "/etc/nginx/ssl"
+    cert_name: "nginx" 
+    nginx_port: 443
+  tasks:
+
+    # - name: Install collection ansible.*
+    #   vars: 
+    #     names: "ansible.posix community.crypto"
+    #   command: "ansible-galaxy collection install {{names}}"
+    #   delegate_to: localhost
+    #   run_once: true
+    #   become: false
+
+    - name: install required...
+      block:
+        - name: install required apt packets
+          apt:
+            name: "{{item}}"
+            update_cache: true
+            state: present
+          loop: ['python3-pip', 'firewalld']
+          tags: cert, nginx, db
+          
+        - name: install required python modules
+          pip: 
+            name: "{{ item }}" 
+          loop: ['cryptography', 'pyopenssl']
+          tags: cert, nginx
+
+        - name: Generate certificates
+          include_role:
+            name: "nginx_certificate"
+            apply:
+              tags: 
+                - always
+          tags: cert
+          
+        - name: Install nginx
+          include_role:
+            name: "nginx"
+            apply:
+              tags: 
+                - always
+          vars:
+            nginx_port: 443
+          tags: nginx
+          
+        - name: Install mysql
+          include_role:
+            name: "mariadb"
+            apply:
+              tags: 
+                - always
+          tags: db
+      when: 
+        - "ansible_facts.distribution | lower == 'ubuntu'"
+
+  post_tasks:
+  - name: check web site from control server
+    uri:
+      url: "https://{{ ansible_host }}:{{ nginx_port }}"
+      return_content: true
+      validate_certs: no
+    connection: local
+    register: example_webpage_out
+    failed_when: example_webpage_out.status != 200
+    become: false
+    tags: nginx
