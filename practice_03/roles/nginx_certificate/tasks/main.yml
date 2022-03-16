@@ -2,9 +2,15 @@
 
 - name: install required linux modules
   apt:
-    name: {{ item }}
+    name: "{{ apt_name }}"
     update_cache: true
-  loop: [apt-transport-https, lsb-release, ca-certificates, openssl]
+  loop:
+    - 'apt-transport-https'
+    - 'lsb-release'
+    - 'ca-certificates'
+    - 'openssl'
+  loop_control:
+    loop_var: apt_name
 
 - name: Create necessary folders
   file:

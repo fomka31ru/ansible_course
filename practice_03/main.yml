@@ -25,17 +25,23 @@
       block:
         - name: install required apt packets
           apt:
-            name: "{{item}}"
+            name: "{{ apt_name }}"
             update_cache: true
             state: present
-          loop: ['python3-pip', 'firewalld']
+          loop:
+            - 'python3-pip'
+            - 'firewalld'
+          loop_control:
+            loop_var: apt_name
           tags: always
 
         - name: install required python modules
           pip:
-            name: "{{ item }}"
+            name: "{{ pip_module }}"
           loop: ['cryptography', 'pyopenssl']
-          tags:
+          loop_control:
+            loop_var: pip_module
+          tags: 
             - ca
             - nginx
 
