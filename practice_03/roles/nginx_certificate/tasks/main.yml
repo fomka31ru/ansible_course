@@ -37,10 +37,5 @@
       provider: selfsigned
     register: ca_result
 
-  - name: debug ca_result
-    debug:
-      var: ca_result
-      
-  - name: set fact
-    set_fact: 
+  - set_fact: 
       ca_changed: "{{ca_result.changed}}"

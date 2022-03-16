@@ -42,7 +42,7 @@
 
   - name: notify when certificate was changed
     debug: 
-      msg: "notify habdler for restart, {{ca_changed}}"
+      msg: "notify handler for restart nginx, {{ca_changed}}"
     changed_when: ca_changed
     notify: restart nginx
 
