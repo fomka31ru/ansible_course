@@ -69,7 +69,7 @@
     uri:
       url: "https://{{ ansible_host }}:{{ nginx_port }}"
       return_content: true
-      validate_certs: no
+      validate_certs: nols
     connection: local
     register: example_webpage_out
     failed_when: example_webpage_out.status != 200
