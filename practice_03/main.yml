@@ -18,27 +18,27 @@
 
     - name: install required...
       block:
-        # - name: install required apt packets
-        #   apt:
-        #     name: "{{item}}"
-        #     update_cache: true
-        #     state: present
-        #   loop: ['python3-pip', 'firewalld']
-        #   tags: always
+        - name: install required apt packets
+          apt:
+            name: "{{item}}"
+            update_cache: true
+            state: present
+          loop: ['python3-pip', 'firewalld']
+          tags: always
           
-        # - name: install required python modules
-        #   pip: 
-        #     name: "{{ item }}" 
-        #   loop: ['cryptography', 'pyopenssl']
-        #   tags: cert, nginx
+        - name: install required python modules
+          pip: 
+            name: "{{ item }}" 
+          loop: ['cryptography', 'pyopenssl']
+          tags: ca, nginx
 
         - name: Generate certificates
           include_role:
             name: "nginx_certificate"
             apply:
               tags: 
-                - all
-          tags: cert
+                - ca
+          tags: always
           
         - name: Install nginx
           include_role:
@@ -46,16 +46,16 @@
             handlers_from: main.yml
             apply:
               tags: 
-                - all
-          tags: nginx
+                - nginx
+          tags: always
           
         - name: Install mysql
           include_role:
             name: "mariadb"
             apply:
               tags: 
-                - all
-          tags: db
+                - db
+          tags: always
       when: 
         - "ansible_facts.distribution | lower == 'ubuntu'"
 
