@@ -1,0 +1,55 @@
+---
+  - name: create nginx repo definition
+    copy:
+      src: nginx.repo
+      dest: /etc/nginx
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: install nginx
+    apt:
+      name: nginx
+      update_cache: true
+      state: present
+
+  - name: copy main nginx config file
+    copy:
+      src: files/nginx.conf
+      dest: /etc/nginx/nginx.conf
+      owner: root
+      group: root
+      mode: 0644
+    notify: restart nginx
+
+  - name: copy site's nginx config file
+    template:
+      src: templates/nginx.conf.j2
+      dest: /etc/nginx/conf.d/notls.conf
+      owner: root
+      group: root
+      mode: 0644
+    notify: restart nginx
+
+  - name: copy index.html
+    template:
+      src: templates/index.html.j2
+      dest: /usr/share/nginx/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+    notify: restart nginx
+
+  - name: notify when certificate was changed
+    debug: 
+      msg: "notify handler for restart nginx, {{ca_changed}}"
+    changed_when: ca_changed
+    notify: restart nginx
+
+  - name: insert firewalld rule for nginx
+    firewalld:
+      port: "{{ nginx_port }}/tcp"
+      permanent: true
+      state: enabled
+      immediate: true
+    ignore_errors: true
