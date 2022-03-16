@@ -29,7 +29,7 @@
       owner: root
       group: root
       mode: 0644
-    notify: restart_nginx
+    notify: restart nginx
 
   - name: copy index.html
     template:
@@ -38,7 +38,13 @@
       owner: root
       group: root
       mode: 0644
-    notify: restart_nginx
+    notify: restart nginx
+
+  - name: notify when certificate was changed
+    debug: 
+      msg: "notify handler for restart nginx, {{ca_changed}}"
+    changed_when: ca_changed
+    notify: restart nginx
 
   - name: insert firewalld rule for nginx
     firewalld:
@@ -47,5 +53,3 @@
       state: enabled
       immediate: true
     ignore_errors: true
-
-

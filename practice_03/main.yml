@@ -24,39 +24,38 @@
             update_cache: true
             state: present
           loop: ['python3-pip', 'firewalld']
-          tags: cert, nginx, db
+          tags: always
           
         - name: install required python modules
           pip: 
             name: "{{ item }}" 
           loop: ['cryptography', 'pyopenssl']
-          tags: cert, nginx
+          tags: ca, nginx
 
         - name: Generate certificates
           include_role:
             name: "nginx_certificate"
             apply:
               tags: 
-                - always
-          tags: cert
+                - ca
+          tags: always
           
         - name: Install nginx
           include_role:
-            name: "nginx"
+            name: nginx
+            handlers_from: main.yml
             apply:
               tags: 
-                - always
-          vars:
-            nginx_port: 443
-          tags: nginx
+                - nginx
+          tags: always
           
         - name: Install mysql
           include_role:
             name: "mariadb"
             apply:
               tags: 
-                - always
-          tags: db
+                - db
+          tags: always
       when: 
         - "ansible_facts.distribution | lower == 'ubuntu'"
 
@@ -65,9 +64,3 @@
     uri:
       url: "https://{{ ansible_host }}:{{ nginx_port }}"
       return_content: true
-      validate_certs: no
-    connection: local
-    register: example_webpage_out
-    failed_when: example_webpage_out.status != 200
-    become: false
-    tags: nginx

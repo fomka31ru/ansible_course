@@ -5,7 +5,7 @@
   become: true
   become_method: sudo
   vars:
-    nginx_port_tls: 443
+    nginx_port: 443
     cert_path: "/etc/nginx/ssl"
 
   tasks:
@@ -88,7 +88,7 @@
 
     - name: insert firewalld rule for nginx
       firewalld:
-        port: "{{ nginx_port_tls }}/tcp"
+        port: "{{ nginx_port }}/tcp"
         permanent: true
         state: enabled
         immediate: true
@@ -127,7 +127,7 @@
   post_tasks:
     - name: check web site from control server
       uri:
-        url: "https://{{ ansible_host }}:{{ nginx_port_tls }}"
+        url: "https://{{ ansible_host }}:{{ nginx_port }}"
         return_content: true
         validate_certs: no
       connection: local
