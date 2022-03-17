@@ -14,7 +14,7 @@
 
 - name: Create necessary folders
   file:
-    path: "{{ cert_path }}"
+    path: "{{ ca_path }}"
     state: directory
     recurse: true
     owner: root
@@ -23,15 +23,15 @@
 
 - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
   openssl_privatekey:
-    path: "{{ cert_path }}/{{ cert_name }}.pem"
+    path: "{{ ca_path }}/{{ ca_name }}.pem"
     force: true
     owner: root
     group: root
 
 - name: Generate an OpenSSL Certificate Signing Request
   openssl_csr:
-    path: "{{ cert_path }}/{{ cert_name }}.csr"
-    privatekey_path: "{{ cert_path }}/{{ cert_name }}.pem"
+    path: "{{ ca_path }}/{{ ca_name }}.csr"
+    privatekey_path: "{{ ca_path }}/{{ ca_name }}.pem"
     common_name: nginx.localhost
     country_name: RU
     organization_name: ansible
@@ -42,9 +42,9 @@
 
 - name: Generate a Self Signed OpenSSL certificate
   openssl_certificate:
-    path: "{{ cert_path }}/{{ cert_name }}.crt"
-    privatekey_path: "{{ cert_path }}/{{ cert_name }}.pem"
-    csr_path: "{{ cert_path }}/{{ cert_name }}.csr"
+    path: "{{ ca_path }}/{{ ca_name }}.crt"
+    privatekey_path: "{{ ca_path }}/{{ ca_name }}.pem"
+    csr_path: "{{ ca_path }}/{{ ca_name }}.csr"
     provider: selfsigned
     owner: root
     group: root

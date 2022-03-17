@@ -1,0 +1,3 @@
+---
+ca_path: "~/.ssh/ansible_generated_certificates"
+ca_name: "id_default"

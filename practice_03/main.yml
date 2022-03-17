@@ -10,8 +10,8 @@
   become: true
   become_method: sudo
   vars:
-    cert_path: "/etc/nginx/ssl"
-    cert_name: "nginx"
+    ca_path: "/etc/nginx/ssl"
+    ca_name: "nginx"
     nginx_port: 443
   tasks:
 
@@ -49,7 +49,7 @@
 
         - name: Generate certificates
           include_role:
-            name: "nginx_certificate"
+            name: "nginx_ca"
             apply:
               tags:
                 - ca

@@ -1,3 +1,0 @@
----
-cert_path: "~/.ssh/ansible_generated_certificates"
-cert_name: "id_default"
