@@ -1,0 +1,75 @@
+---
+
+- name: Copy wordpress.conf from files to /etc/php-fpm.d/wordpress.conf
+  copy:
+    src: files/wordpress.conf
+    dest: /etc/php/7.4/fpm/pool.d/wordpress.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create /srv/wordpress folder
+  file:
+    path: /srv/wordpress
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+    mode: 0644
+
+- name: >
+    Download WordPress from http://wordpress.org/wordpress-{{ wp_version }}.tar.gz
+    to /srv/ folder + checksum
+  get_url:
+    url: http://wordpress.org/wordpress-{{ wp_version }}.tar.gz
+    dest: /tmp/wordpress-{{ wp_version }}.tar.gz
+    checksum: "{{wp_checksum}}"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Unarchive wordpress to /srv folder
+  unarchive:
+    src: /tmp/wordpress-{{ wp_version }}.tar.gz
+    dest: /srv/wordpress/
+    remote_src: true
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Add linux group "wordpress"
+  group:
+    name: wordpress
+    state: present
+
+- name: >
+    Add linux user "wordpress" with group "wordpress"
+    and /srv/wordpress as homedir
+  user:
+    name: wordpress
+    # password: "{{ wp_user_password | default(wordpress, true) | password_hash('sha512')}}"
+    comment: "Ansible-generated user"
+    groups: wordpress
+    home: /srv/wordpress
+    state: present
+    # no_log: true
+
+- name: >
+    Copy WordPress config file from templates
+    to /srv/wordpress/wp-config.php
+  template:
+    src: templates/wp-config.php.j2
+    dest: /srv/wordpress/wp-config.php
+    owner: root
+    group: root
+    mode: 0644
+
+- name: >
+    /srv/wordpress directory recursive rights
+    for wordpress user and group
+  file:
+    path: /srv/wordpress
+    state: directory
+    recurse: yes
+    owner: wordpress
+    group: wordpress

@@ -20,10 +20,25 @@
     state: started
     enabled: true
 
-- name: install MySQL-python module
-  pip:
-    name: 'mysqlclient'
+- name: block of install MySQL-python module
+  block:
+    - name: install MySQL-python module from repo
+      pip:
+        name: 'mysqlclient'
+  
+  rescue:      
+    - name: copy MySQL-python module to remote host
+      copy:
+        src: files/mysqlclient-2.1.0.tar.gz
+        dest: /tmp/mysqlclient-2.1.0.tar.gz
+        owner: root
+        group: root
+        mode: 0644
 
+    - name: install MySQL-python module from file
+      pip:
+        name: '/tmp/mysqlclient-2.1.0.tar.gz'
+  # end block
 - name: Create "{{ db_name }}" database
   mysql_db:
     name: "{{ db_name }}"

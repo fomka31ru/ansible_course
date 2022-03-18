@@ -1,0 +1,31 @@
+---
+# vars file for practice_03/roles/php
+# list of required packages for php
+php_packages_list:
+  - php
+  - php-curl
+  - php-dom
+  - php-exif
+  - php-fileinfo
+  - php-fpm
+  - php-gd
+  # - php-hash
+  - php-imagick
+  - php-json
+  - php-mbstring
+  - php-mysql
+  - php-xml
+  - php-zip
+  - php-cli 
+  - php-common 
+  - php-pear 
+  - php-bcmath
+  - php7.4-bcmath
+  - php7.4-bz2
+  - php7.4-intl
+  - php7.4-gd
+  - php7.4-mbstring
+  - php7.4-mysql
+  - php7.4-zip
+  - php7.4-common
+  - php7.4-fpm

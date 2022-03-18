@@ -1,0 +1,32 @@
+---
+# - name: create php repo definition
+#   copy:
+#     src: "{{ item }}"
+#     dest: /etc/php
+#     owner: root
+#     group: root
+#     mode: 0644
+#   loop: [remi-safe.repo, remi-php74.repo, epel.repo]
+
+- name: create php repo definition
+  apt_repository: 
+    repo="ppa:ondrej/php" 
+    update_cache=yes
+
+- name: install required php packets
+  apt:
+    name: "{{ apt_name }}"
+    update_cache: true
+    state: present
+    force_apt_get: true
+  loop: "{{ php_packages_list }}"
+  loop_control:
+    loop_var: apt_name
+  ignore_errors: true
+  notify: restart php
+
+# - name: Remove default php www.conf file
+#   file:
+#     path: /etc/php/7.4/fpm/pool.d/www.conf
+#     state: absent
+#   notify: restart php
