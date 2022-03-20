@@ -1,3 +1,0 @@
----
-# defaults file for roles/mariadb
-mysql_port: 3306

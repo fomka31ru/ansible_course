@@ -1,0 +1,29 @@
+---
+- name: Check site's availability
+  # hosts: nodes
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: pip install requests
+      pip:
+        name: requests
+
+    - name: healthcheck
+      healthcheck_py:
+        addr: "https://google.com"
+        # tls: false
+      register: py_result
+
+    - name: print result
+      debug:
+        msg: "{{ py_result }}"
+
+    - name: healthcheck
+      healthcheck_sh:
+        addr: "https://google.com"
+        # tls: false
+      register: sh_result
+
+    - name: print result
+      debug:
+        msg: "{{ sh_result }}"
