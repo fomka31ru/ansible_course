@@ -98,7 +98,3 @@
       become: false
       tags:
         - check
-
-# если не заработает используем расстрельный вариант
-# sudo chmod 777 /run/wordpress/*
-# sudo chmod 777 /var/run/php/wordpress.sock

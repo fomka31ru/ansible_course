@@ -80,12 +80,10 @@
     recurse: true
     owner: wordpress
     group: wordpress
-    mode: 0755
+    mode: 0750
 
 - name: Add linux user "nginx" to group "wordpress"
   user:
-    name: "{{ item }}"
+    name: nginx
     groups: wordpress
     append: true
-  loop:
-    - nginx

@@ -71,14 +71,3 @@
     home: /etc/nginx
     state: present
   no_log: true
-
-# - name: >
-#     /etc/nginx directory recursive rights
-#     for nginx user and group
-#   file:
-#     path: /etc/nginx
-#     state: directory
-#     recurse: true
-#     owner: nginx
-#     group: nginx
-#     mode: 0750
