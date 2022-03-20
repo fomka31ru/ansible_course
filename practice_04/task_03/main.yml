@@ -1,0 +1,104 @@
+---
+# Перед запуском ansible-lint создать файл .ansible-lint
+# skip_list:
+#   - fqcn-builtins
+#   - meta-incorrect
+#   - meta-no-info
+
+- name: install NGINX && MARIADB
+  hosts: nodes
+  become: true
+  become_method: sudo
+  vars:
+    ca_path: "/etc/nginx/ssl"
+    ca_name: "nginx"
+    nginx_port: 5555
+    phpv: "7.4"
+  tasks:
+
+    # - name: Install collection ansible.*
+    #   vars:
+    #     names: "ansible.posix community.crypto"
+    #   command: "ansible-galaxy collection install {{names}}"
+    #   delegate_to: localhost
+    #   run_once: true
+    #   become: false
+
+    - name: install required...
+      block:
+        - name: install required apt packets
+          apt:
+            name: "{{ apt_name }}"
+            update_cache: true
+            state: present
+          loop:
+            - 'python3-pip'
+            - 'firewalld'
+          loop_control:
+            loop_var: apt_name
+          tags: always
+
+        - name: Generate certificates
+          include_role:
+            name: "nginx_ca"
+            apply:
+              tags:
+                - ca
+          tags:
+            - never
+
+        - name: Install nginx
+          include_role:
+            name: nginx
+            handlers_from: main.yml
+            apply:
+              tags:
+                - nginx
+          tags:
+            - never
+
+        - name: Install mysql
+          include_role:
+            name: "mariadb"
+            apply:
+              tags:
+                - db
+          tags:
+            - never
+
+        - name: Install php
+          include_role:
+            name: "php"
+            apply:
+              tags:
+                - php
+          tags:
+            - never
+
+        - name: Install wordpress
+          include_role:
+            name: "wordpress"
+            apply:
+              tags:
+                - wp
+          tags:
+            - always
+      when:
+        - "ansible_facts.distribution | lower == 'ubuntu'"
+
+  post_tasks:
+    - name: check web site from control server
+      uri:
+        url: "https://{{ ansible_host }}:{{ nginx_port }}"
+        return_content: true
+        validate_certs: false
+      connection: local
+      register: example_webpage_out
+      failed_when: example_webpage_out.status != 200
+      become: false
+      tags:
+        - check
+
+# если не заработает используем расстрельный вариант
+# sudo chmod 777 /run/wordpress/*
+# sudo chmod 777 /var/run/php/wordpress.sock

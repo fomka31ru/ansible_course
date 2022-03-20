@@ -1,0 +1,6 @@
+---
+# defaults file for nginx
+nginx_port: 5555
+nginx_tls_port: 443
+nginx_notls_port: 80
+server_hostname: ansible-node1.localdomain

@@ -1,0 +1,84 @@
+---
+
+- name: install required python modules
+  pip:
+    name: "{{ pip_module }}"
+  loop: ['cryptography', 'pyopenssl']
+  loop_control:
+    loop_var: pip_module
+
+- name: install nginx
+  apt:
+    name: nginx
+    update_cache: true
+    state: present
+
+- name: copy main nginx config file
+  copy:
+    src: files/nginx.conf
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginx
+
+- name: copy site's nginx config file
+  template:
+    src: templates/nginx.conf.j2
+    dest: /etc/nginx/conf.d/notls.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginx
+
+- name: copy index.html
+  template:
+    src: templates/index.html.j2
+    dest: /usr/share/nginx/html/index.html
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginx
+
+- name: notify when certificate was changed
+  debug:
+    msg: "notify handler for restart nginx, {{ ca_changed }}"
+  changed_when: ca_changed
+  notify: restart nginx
+
+- name: insert firewalld rule for nginx
+  firewalld:
+    port: "{{ item }}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop:
+    - "{{ nginx_notls_port }}/tcp"
+    - "{{ nginx_tls_port }}/tcp"
+    - "{{ nginx_port }}/tcp"
+
+- name: Add linux group "nginx"
+  group:
+    name: nginx
+    state: present
+
+- name: Add linux user "nginx" with group "nginx"
+  user:
+    name: nginx
+    password: "{{ nginx_user_password | default('nginx', true) | password_hash('sha512') }}"
+    comment: "Ansible-generated user"
+    groups: nginx
+    home: /etc/nginx
+    state: present
+  no_log: true
+
+# - name: >
+#     /etc/nginx directory recursive rights
+#     for nginx user and group
+#   file:
+#     path: /etc/nginx
+#     state: directory
+#     recurse: true
+#     owner: nginx
+#     group: nginx
+#     mode: 0750

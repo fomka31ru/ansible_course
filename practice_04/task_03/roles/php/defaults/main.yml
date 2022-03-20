@@ -1,0 +1,3 @@
+---
+# defaults file for practice_03/roles/php
+phpv: "7.4"

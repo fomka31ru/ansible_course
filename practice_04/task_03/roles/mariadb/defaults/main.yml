@@ -1,0 +1,6 @@
+---
+# defaults file for roles/mariadb
+mysql_port: 3306
+db_name: default
+db_user: default
+db_password: default

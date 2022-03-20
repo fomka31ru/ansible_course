@@ -1,0 +1,55 @@
+---
+
+- name: install required linux modules
+  apt:
+    name: "{{ apt_name }}"
+    update_cache: true
+  loop:
+    - 'apt-transport-https'
+    - 'lsb-release'
+    - 'ca-certificates'
+    - 'openssl'
+  loop_control:
+    loop_var: apt_name
+
+- name: Create necessary folders
+  file:
+    path: "{{ ca_path }}"
+    state: directory
+    recurse: true
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
+  openssl_privatekey:
+    path: "{{ ca_path }}/{{ ca_name }}.pem"
+    # force: true
+    owner: root
+    group: root
+
+- name: Generate an OpenSSL Certificate Signing Request
+  openssl_csr:
+    path: "{{ ca_path }}/{{ ca_name }}.csr"
+    privatekey_path: "{{ ca_path }}/{{ ca_name }}.pem"
+    common_name: nginx.localhost
+    country_name: RU
+    organization_name: ansible
+    email_address: ansible@domain.local
+    # force: true
+    owner: root
+    group: root
+
+- name: Generate a Self Signed OpenSSL certificate
+  openssl_certificate:
+    path: "{{ ca_path }}/{{ ca_name }}.crt"
+    privatekey_path: "{{ ca_path }}/{{ ca_name }}.pem"
+    csr_path: "{{ ca_path }}/{{ ca_name }}.csr"
+    provider: selfsigned
+    owner: root
+    group: root
+  register: ca_result
+
+- name: set fact ca_changed
+  set_fact:
+    ca_changed: "{{ ca_result.changed }}"

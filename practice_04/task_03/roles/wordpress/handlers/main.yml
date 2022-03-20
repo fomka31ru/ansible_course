@@ -1,0 +1,6 @@
+---
+# handlers file for practice_03/roles/php
+- name: restart php
+  service:
+    name: "php{{ phpv }}-fpm"
+    state: restarted

@@ -1,0 +1,19 @@
+---
+# vars file for practice_03/roles/php
+# list of required packages for php
+php_packages_list:
+  - "php{{ phpv }}"
+  - "php{{ phpv }}-curl"
+  - "php{{ phpv }}-common"
+  - "php{{ phpv }}-cli"
+  - "php{{ phpv }}-dom"
+  - "php{{ phpv }}-exif"
+  - "php{{ phpv }}-intl"
+  - "php{{ phpv }}-fpm"
+  - "php{{ phpv }}-gd"
+  - "php{{ phpv }}-imagick"
+  - "php{{ phpv }}-json"
+  - "php{{ phpv }}-mbstring"
+  - "php{{ phpv }}-mysql"
+  - "php{{ phpv }}-xml"
+  - "php{{ phpv }}-zip"
