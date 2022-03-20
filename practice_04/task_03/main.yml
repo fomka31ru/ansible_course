@@ -13,6 +13,7 @@
     ca_path: "/etc/nginx/ssl"
     ca_name: "nginx"
     nginx_port: 5555
+    nginx_tls_port: 443
     phpv: "7.4"
   tasks:
 
@@ -89,7 +90,7 @@
   post_tasks:
     - name: check web site from control server
       uri:
-        url: "https://{{ ansible_host }}:{{ nginx_port }}"
+        url: "https://{{ ansible_host }}:{{ nginx_tls_port }}"
         return_content: true
         validate_certs: false
       connection: local
