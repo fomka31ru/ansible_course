@@ -67,16 +67,16 @@ def url_check(url):
         'failed': True, 
         'rc': '1', 
         'site_status': 'Error', 
-        'msg': e
+        'msg': str(e)
       }
   else:
       site_status = "Service is available" if echo.status_code == 200 else "Service is not available"
       result = {
         'failed': False, 
         'rc': '0', 
-        'msg': site_status,
+        'msg': str(site_status),
         'site_status': str(echo.status_code), 
-        'site_msg': echo.reason,
+        'site_msg': str(echo.reason),
       }
   finally:
       return result
