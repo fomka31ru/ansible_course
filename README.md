@@ -1,7 +1,11 @@
 # ansible_course
 #### The first day exercise is in practice_01 folder.
 
-some text
+Additional galaxy collection is used
+
+> ansible-galaxy collection install 
+> - ansible.posix 
+> - community.crypto
 
 #### The second day exercise is in practice_02 folder.
 
