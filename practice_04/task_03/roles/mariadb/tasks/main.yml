@@ -55,7 +55,7 @@
   no_log: true
 
 - name: insert firewalld rule for mysql
-  firewalld:
+  ansible.posix.firewalld:
     port: "{{ mysql_port }}/tcp"
     permanent: true
     state: enabled

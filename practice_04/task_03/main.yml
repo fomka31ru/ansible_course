@@ -1,11 +1,12 @@
 ---
+# ansible-galaxy collection install ansible.posix community.crypto
 # Перед запуском ansible-lint создать файл .ansible-lint
 # skip_list:
 #   - fqcn-builtins
 #   - meta-incorrect
 #   - meta-no-info
 
-- name: install NGINX && MARIADB
+- name: install WORDPRESS
   hosts: nodes
   become: true
   become_method: sudo
@@ -16,14 +17,6 @@
     nginx_tls_port: 443
     phpv: "7.4"
   tasks:
-
-    # - name: Install collection ansible.*
-    #   vars:
-    #     names: "ansible.posix community.crypto"
-    #   command: "ansible-galaxy collection install {{names}}"
-    #   delegate_to: localhost
-    #   run_once: true
-    #   become: false
 
     - name: install required...
       block:

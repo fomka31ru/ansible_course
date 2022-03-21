@@ -47,7 +47,7 @@
   notify: restart nginx
 
 - name: insert firewalld rule for nginx
-  firewalld:
+  ansible.posix.firewalld:
     port: "{{ item }}"
     permanent: true
     state: enabled

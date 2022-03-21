@@ -22,14 +22,14 @@
     mode: 0644
 
 - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
-  openssl_privatekey:
+  community.crypto.openssl_privatekey:
     path: "{{ ca_path }}/{{ ca_name }}.pem"
     # force: true
     owner: root
     group: root
 
 - name: Generate an OpenSSL Certificate Signing Request
-  openssl_csr:
+  community.crypto.openssl_csr:
     path: "{{ ca_path }}/{{ ca_name }}.csr"
     privatekey_path: "{{ ca_path }}/{{ ca_name }}.pem"
     common_name: nginx.localhost
