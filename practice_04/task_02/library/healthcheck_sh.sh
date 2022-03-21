@@ -10,11 +10,14 @@ return_code=$(echo "${return}" | cut -d' ' -f2 )
 return_status=$(echo "${return}" | cut -d' ' -f3- | tr -d '\r')
 
 if [[ "${return_code}" == '200' ]]; then
-    msg="Service is available"
+    msg="Service is available";
+    rc="0"
 else
-    msg="Service is not available"
+    msg="Service is not available";
+    rc="1"
 fi
 
 echo "{\"site_status\": \"$return_code\",
 \"site_msg\": \"$return_status\",
-\"msg\": \"$msg\"}"
+\"msg\": \"$msg\",
+\"rc\": \"$rc\"}"

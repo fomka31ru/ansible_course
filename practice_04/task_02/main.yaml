@@ -9,21 +9,21 @@
         name: requests
 
     - name: healthcheck
-      healthcheck_py:
-        addr: "https://google.com"
-        # tls: false
-      register: py_result
-
-    - name: print result
-      debug:
-        msg: "{{ py_result }}"
-
-    - name: healthcheck
       healthcheck_sh:
-        addr: "https://google.com"
+        addr: "https://nas"
         # tls: false
       register: sh_result
 
     - name: print result
       debug:
         msg: "{{ sh_result }}"
+    
+    - name: healthcheck
+      healthcheck_py:
+        addr: "https://nas"
+        # tls: false
+      register: py_result
+
+    - name: print result
+      debug:
+        msg: "{{ py_result }}"
